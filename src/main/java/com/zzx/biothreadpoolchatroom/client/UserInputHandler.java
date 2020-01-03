@@ -1,6 +1,5 @@
 package com.zzx.biothreadpoolchatroom.client;
 
-import client.ChatClient;
 import java.io.*;
 
 public class UserInputHandler implements Runnable {

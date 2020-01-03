@@ -35,7 +35,10 @@ public class Server {
             System.out.println("启动服务器，监听端口:" + DEFAULT_PORT);
 
             while (true) {
+                // 等待连接请求
                 serverChannel.accept(null, new AcceptHandler());
+                // 小把戏
+                // 阻塞，避免循环过于频繁
                 System.in.read();
             }
         } catch (IOException e) {

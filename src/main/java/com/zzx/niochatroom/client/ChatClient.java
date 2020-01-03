@@ -14,6 +14,7 @@ public class ChatClient {
     private static final String DEFAULT_SERVER_HOST = "127.0.0.1";
     private static final int DEFAULT_SERVER_PORT = 8888;
     private static final String QUIT = "quit";
+    // 把常用buffer变量提取出来
     private static final int BUFFER = 1024;
 
     private String host;
@@ -52,6 +53,7 @@ public class ChatClient {
             client = SocketChannel.open();
             client.configureBlocking(false);
 
+            // client注册到seletor，并连接到服务端
             selector = Selector.open();
             client.register(selector, SelectionKey.OP_CONNECT);
             client.connect(new InetSocketAddress(host, port));
@@ -78,19 +80,25 @@ public class ChatClient {
         // CONNECT事件 - 连接就绪事件
         if (key.isConnectable()) {
             SocketChannel client = (SocketChannel) key.channel();
+            // 连接是否就绪
             if (client.isConnectionPending()) {
+                // 正式建立连接
                 client.finishConnect();
                 // 处理用户的输入
                 new Thread(new UserInputHandler(this)).start();
             }
+            // 注册以保证，能够接收到服务器返回的信息
             client.register(selector, SelectionKey.OP_READ);
         }
         // READ事件 -  服务器转发消息
+        // 表明socketChannel已经有新的消息需要处理了
         else if (key.isReadable()) {
             SocketChannel client = (SocketChannel) key.channel();
+            // 从相应通道读取数据
             String msg = receive(client);
             if (msg.isEmpty()) {
                 // 服务器异常
+                // 所有注册关闭，channel关闭，client退出
                 close(selector);
             } else {
                 System.out.println(msg);
